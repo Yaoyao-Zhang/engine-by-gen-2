@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model LoanApplication {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Personal Information
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  dateOfBirth String // yyyy-mm-dd
+  ssnEncrypted String // AES-256-GCM encrypted
+  ssnIv        String // initialization vector for decryption
+  ssnTag       String // auth tag for GCM
+  address1    String
+  address2    String?
+  city        String
+  state       String // 2-letter abbreviation
+  zipcode     String
+
+  // Loan Information
+  loanPurpose String
+  loanAmount  Int
+
+  // Mortgage Information
+  propertyStatus String
+
+  // Credit Information
+  creditScore Int
+
+  // Financial Information
+  employmentStatus       String
+  employmentPayFrequency String
+  annualIncome           Int
+
+  // Legal Information
+  consentsToFcra Boolean
+  fcraLanguage   String
+  consentsToTcpa Boolean
+  tcpaLanguage   String?
+
+  // Session Information
+  ipAddress String
+  userAgent String
+
+  // Engine API tracking
+  engineLeadUuid      String?
+  engineRateTableUuid String?
+
+  // Relations
+  loanOffers LoanOffer[]
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([loanPurpose])
+  @@index([creditScore])
+}
+
+model LoanOffer {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  applicationId String
+  application   LoanApplication @relation(fields: [applicationId], references: [id])
+
+  // Originator info
+  originatorKey  String?
+  originatorName String?
+  originatorLogo String?
+  originatorDisclaimer String?
+
+  // Offer details
+  offerUuid       String?
+  termLength      Int?
+  termUnit        String?
+  maxAmount       Float?
+  minAmount       Float?
+  maxApr          Float?
+  minApr          Float?
+  meanApr         Float?
+  monthlyPayment  Float?
+  maxMonthlyPayment Float?
+  minMonthlyPayment Float?
+  preQualified    Boolean @default(false)
+  preApproved     Boolean @default(false)
+  url             String?
+  productType     String?
+  productSubType  String?
+  aprType         String?
+  sponsored       Boolean @default(false)
+
+  // Raw response for auditing
+  rawResponse String? // JSON string of full offer object
+
+  @@index([applicationId])
+  @@index([createdAt])
+}
