@@ -4,6 +4,9 @@ import { loanApplicationSchema } from "@/lib/validation";
 import { encryptSSN } from "@/lib/encryption";
 import { submitToEngine, pollForOffers, FCRA_LANGUAGE, TCPA_LANGUAGE } from "@/lib/engine-api";
 import type { LoanOffer } from "@/lib/engine-api";
+import { SlidingWindowRateLimiter } from "@/lib/SlidingWindowRateLimiter";
+
+const rateLimiter = new SlidingWindowRateLimiter(10 * 60 * 1000, 3);
 
 function getMockOffers(): LoanOffer[] {
   return [
@@ -102,6 +105,20 @@ function getMockOffers(): LoanOffer[] {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "0.0.0.0";
+
+    const { allowed, retryAfterMs } = rateLimiter.isAllowed(ip);
+    if (!allowed) {
+      const retryAfterSeconds = Math.ceil(retryAfterMs / 1000);
+      return NextResponse.json(
+        { error: "Too many requests", retryAfterMs },
+        { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
+      );
+    }
+
     const body = await request.json();
 
     const parsed = loanApplicationSchema.safeParse(body);
@@ -114,10 +131,7 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
-    const ipAddress =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "0.0.0.0";
+    const ipAddress = ip;
     const userAgent = request.headers.get("user-agent") || "Unknown";
 
     const { encrypted, iv, tag } = encryptSSN(data.ssn);

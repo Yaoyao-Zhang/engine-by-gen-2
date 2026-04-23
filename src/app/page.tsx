@@ -73,6 +73,7 @@ export default function Home() {
   const [offers, setOffers] = useState<OfferData[] | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [stressResults, setStressResults] = useState<{ allowed: boolean }[] | null>(null);
 
   const methods = useForm<LoanApplicationFormData>({
     resolver: zodResolver(loanApplicationSchema),
@@ -133,6 +134,13 @@ export default function Home() {
 
       const result = await response.json();
 
+      if (response.status === 429) {
+        const minutes = Math.ceil((result.retryAfterMs as number) / 60000);
+        throw new Error(
+          `Too many applications submitted. Please wait ${minutes} minute${minutes !== 1 ? "s" : ""} before trying again.`
+        );
+      }
+
       if (!response.ok) {
         throw new Error(result.error || "Submission failed");
       }
@@ -143,6 +151,20 @@ export default function Home() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function runStressTest() {
+    setStressResults(null);
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () =>
+        fetch("/api/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }).then((r) => ({ allowed: r.status !== 429 }))
+      )
+    );
+    setStressResults(results);
   }
 
   if (offers) {
@@ -200,6 +222,32 @@ export default function Home() {
           {submitError && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
               {submitError}
+            </div>
+          )}
+
+          {process.env.NODE_ENV === "development" && (
+            <div className="mt-6 p-4 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-xs text-gray-500">
+              <p className="font-semibold mb-2 text-gray-600">DSA Demo — Sliding Window Rate Limiter</p>
+              <p className="mb-3">Fire 5 simultaneous requests. Only 3 are allowed per 10-minute window.</p>
+              <button
+                type="button"
+                onClick={runStressTest}
+                className="px-3 py-1.5 bg-gray-700 text-white rounded text-xs font-medium hover:bg-gray-800 transition-colors"
+              >
+                Run Stress Test (5 requests)
+              </button>
+              {stressResults && (
+                <div className="mt-3 flex gap-2 flex-wrap">
+                  {stressResults.map((r, i) => (
+                    <span
+                      key={i}
+                      className={`px-2 py-1 rounded text-white font-mono ${r.allowed ? "bg-emerald-600" : "bg-red-500"}`}
+                    >
+                      #{i + 1} {r.allowed ? "✓ allowed" : "✗ blocked"}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
