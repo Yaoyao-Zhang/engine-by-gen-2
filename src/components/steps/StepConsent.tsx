@@ -5,7 +5,7 @@ import type { LoanApplicationFormData } from "@/lib/validation";
 
 const FCRA_DISPLAY_TEXT =
   "By checking this box and selecting the \"Continue\" button below, I agree that:\n\n" +
-  "I authorize Lantern by SoFi to deliver my information to the various lending providers below in order to help me search for the loan options I have requested.\n\n" +
+  "I authorize Engine by MoneyLion to deliver my information to the various lending providers below in order to help me search for the loan options I have requested.\n\n" +
   "I authorize Engine and each of the lending providers within its networks to obtain my consumer credit report, under the Fair Credit Reporting Act. This is known as a \"soft\" credit pull. If I choose to continue my application directly with a lending provider, they may obtain my full credit report, known as a \"hard\" credit pull, which could affect my credit score.\n\n" +
   "I agree to Engine's Terms of Use and Privacy Policy, and consent to receive Electronic Communications.";
 
@@ -72,9 +72,9 @@ export function StepConsent({
       </div>
 
       <p className="text-xs text-gray-400 mt-6 leading-relaxed">
-        Lantern by SoFi is owned and operated by SoFi Lending Corp. SoFi will be paid a fee
-        for a referral or if you obtain a loan, financial product, or service through the Lantern
-        marketplace. All rates, terms, and conditions vary by provider.{" "}
+        Engine by MoneyLion is owned and operated by MoneyLion Inc. Engine by MoneyLion will be
+        paid a fee for a referral or if you obtain a loan, financial product, or service through the
+        Engine marketplace. All rates, terms, and conditions vary by provider.{" "}
         <span className="underline cursor-pointer">See terms and license info.</span>
       </p>
 

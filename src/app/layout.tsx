@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lantern by SoFi — Personal Loan Marketplace",
+  title: "Engine by MoneyLion — Personal Loan Marketplace",
   description: "Compare personalized loan offers from top lenders. No impact to your credit score.",
 };
 

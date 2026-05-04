@@ -20,8 +20,8 @@ export function StepIncome() {
       </p>
 
       <div className="text-center my-6">
-        <span className="text-lg text-indigo-500 align-top">$</span>
-        <span className="text-5xl font-light text-indigo-700">
+        <span className="text-lg text-gray-400 align-top">$</span>
+        <span className="text-5xl font-light text-gray-900">
           {income.toLocaleString()}
         </span>
       </div>
