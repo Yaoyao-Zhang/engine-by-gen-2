@@ -52,12 +52,10 @@ export function StepCreditScore() {
         </div>
 
         <div className="flex justify-between text-xs text-gray-500 mt-3">
-          <span>Poor (300 - 619)</span>
-          <span>Fair (620 - 659)</span>
-          <span>Good (660 - 719)</span>
-          <span className={score >= 720 ? "font-semibold text-gray-800" : ""}>
-            {getRatingLabel(score).startsWith("Excellent") ? getRatingLabel(score) : "Excellent (720 - 850)"}
-          </span>
+          <span className={score < 620 ? "font-semibold text-gray-800" : ""}>Poor</span>
+          <span className={score >= 620 && score < 660 ? "font-semibold text-gray-800" : ""}>Fair</span>
+          <span className={score >= 660 && score < 720 ? "font-semibold text-gray-800" : ""}>Good</span>
+          <span className={score >= 720 ? "font-semibold text-gray-800" : ""}>Excellent</span>
         </div>
       </div>
 
